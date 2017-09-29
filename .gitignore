@@ -1,0 +1,9 @@
+﻿################################################################################
+# 此 .gitignore 文件已由 Microsoft(R) Visual Studio 自动创建。
+################################################################################
+
+/.vs
+/UnitTestProject1/obj
+/UnitTestProject1/bin
+/FsLib.Tencent.QCloud.SDK/obj
+/FsLib.Tencent.QCloud.SDK/bin
