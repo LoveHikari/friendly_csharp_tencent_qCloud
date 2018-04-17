@@ -15,6 +15,7 @@ namespace FsLib.Tencent.QCloud.SDK.Common
     /// </summary>
     public class HttpHelper
     {
+        HttpWebRequest request;
         #region http请求
 
         /// <summary>
@@ -26,7 +27,7 @@ namespace FsLib.Tencent.QCloud.SDK.Common
         /// <param name="headerItem"></param>
         /// <param name="cookie">cookie容器</param>
         /// <returns>响应的页面, 响应的cookie</returns>
-        public static string PostHttpWebRequest(string url, Dictionary<string, object> postData, string chareset = "utf-8", Hashtable headerItem = null, string cookie = "")
+        public string PostHttpWebRequest(string url, Dictionary<string, object> postData, string chareset = "utf-8", Hashtable headerItem = null, string cookie = "")
         {
             return HttpRequest(url, "POST", postData, chareset, headerItem, null, null, cookie).retHtml;
         }
@@ -39,7 +40,7 @@ namespace FsLib.Tencent.QCloud.SDK.Common
         /// <param name="headerItem">请求头</param>
         /// <param name="cookie">cookie容器</param>
         /// <returns>响应的页面</returns>
-        public static string GetHttpWebRequest(string url, string chareset = "utf-8", Hashtable headerItem = null, string cookie = "")
+        public string GetHttpWebRequest(string url, string chareset = "utf-8", Hashtable headerItem = null, string cookie = "")
         {
             return HttpRequest(url, "GET", null, chareset, headerItem, null, null, cookie).retHtml;
         }
@@ -51,14 +52,14 @@ namespace FsLib.Tencent.QCloud.SDK.Common
         /// <param name="headerItem">请求头</param>
         /// <param name="cookie">cookie容器</param>
         /// <returns>响应的页面</returns>
-        public static Stream GetHttpWebRequest2(string url, string chareset = "utf-8", Hashtable headerItem = null, string cookie = "")
+        public Stream GetHttpWebRequest2(string url, string chareset = "utf-8", Hashtable headerItem = null, string cookie = "")
         {
             return HttpRequestStream(url, "GET", null, chareset, headerItem, null, null, cookie).responseStream;
         }
 
 
         #endregion
-        private static string GetFormData(Dictionary<string, object> param, Hashtable headerItem)
+        private string GetFormData(Dictionary<string, object> param, Hashtable headerItem)
         {
             StringBuilder sb = new StringBuilder();
             if (param != null && headerItem != null)
@@ -113,7 +114,7 @@ namespace FsLib.Tencent.QCloud.SDK.Common
         /// <param name="fileKey"></param> 
         /// <param name="cookie">cookie数据</param> 
         /// <returns>响应源码</returns> 
-        public static string HttpUploadFile(string url, Dictionary<string, object> param, Stream localStream, string fileName, long offset = -1, int sliceSize=0, Hashtable headerItem = null,string fileKey= "filecontent", string cookie = "")
+        public string HttpUploadFile(string url, Dictionary<string, object> param, Stream localStream, string fileName, long offset = -1, int sliceSize=0, Hashtable headerItem = null,string fileKey= "filecontent", string cookie = "")
         {
             // 这个可以是改变的，也可以是下面这个固定的字符串 
             string boundary = DateTime.Now.Ticks.ToString("x");//元素分割标记
@@ -207,7 +208,7 @@ namespace FsLib.Tencent.QCloud.SDK.Common
         /// <param name="request">HttpWebRequest对象</param>
         /// <param name="headerItem">header的属性对象</param>
         /// <example>调用说明：SetHeaderValue(request.Headers, headerItem);</example>
-        private static void SetHeaderValue(HttpWebRequest request, Hashtable headerItem)
+        private void SetHeaderValue(HttpWebRequest request, Hashtable headerItem)
         {
             request.ContentType = "text/html";
             request.UserAgent = "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.101 Safari/537.36";
@@ -248,7 +249,7 @@ namespace FsLib.Tencent.QCloud.SDK.Common
         /// </summary>
         /// <param name="url">url</param>
         /// <param name="cookie">cookie字符串</param>
-        private static CookieContainer GetCookieContainer(string url, string cookie)
+        private CookieContainer GetCookieContainer(string url, string cookie)
         {
             CookieContainer cookieContainer = new CookieContainer();
             if (cookie == null)
@@ -273,7 +274,7 @@ namespace FsLib.Tencent.QCloud.SDK.Common
         /// <param name="stream"></param>
         /// <returns></returns>
         /// <remarks>https://wenku.baidu.com/view/dd321f1a59eef8c75fbfb352.html</remarks>
-        private static byte[] Decompress(Stream stream)
+        private byte[] Decompress(Stream stream)
         {
             MemoryStream ms = new MemoryStream();
 
@@ -304,7 +305,7 @@ namespace FsLib.Tencent.QCloud.SDK.Common
         /// <returns>响应的页面, 响应的cookie</returns>
         /// <c>！注意：有时候请求会重定向，但我们就需要从重定向url获取东西，像QQ登录成功后获取sid，但上面的会自动根据重定向地址跳转。我们可以用:
         ///     request.AllowAutoRedirect = false;设置重定向禁用，你就可以从headers的Location属性中获取重定向地址</c>
-        private static (string retHtml, string cookies) HttpRequest(string url, string qequest, Dictionary<string, object> param, string chareset, Hashtable headerItem, WebProxy proxy, CookieContainer cookies, string cookie)
+        private (string retHtml, string cookies) HttpRequest(string url, string qequest, Dictionary<string, object> param, string chareset, Hashtable headerItem, WebProxy proxy, CookieContainer cookies, string cookie)
         {
             //HttpWebRequest request;
             //if (qequest == "GET")
@@ -339,7 +340,7 @@ namespace FsLib.Tencent.QCloud.SDK.Common
                 if (v.request.Headers[HttpRequestHeader.AcceptEncoding]?.IndexOf("gzip", StringComparison.CurrentCultureIgnoreCase) > -1)
                 {
                     string retString = System.Text.Encoding.GetEncoding(chareset).GetString(Decompress(myResponseStream));
-                    v.request.Abort();
+                    //v.request.Abort();
                     return (retString, cookie);
                 }
                 else
@@ -347,7 +348,7 @@ namespace FsLib.Tencent.QCloud.SDK.Common
                     using (StreamReader myStreamReader = new StreamReader(myResponseStream, Encoding.GetEncoding(chareset)))
                     {
                         string retString = myStreamReader.ReadToEnd();
-                        v.request.Abort();
+                        //v.request.Abort();
                         return (retString, cookie);
                     }
                 }
@@ -371,9 +372,9 @@ namespace FsLib.Tencent.QCloud.SDK.Common
         /// <returns>响应的页面, 响应的cookie</returns>
         /// <c>！注意：有时候请求会重定向，但我们就需要从重定向url获取东西，像QQ登录成功后获取sid，但上面的会自动根据重定向地址跳转。我们可以用:
         ///     request.AllowAutoRedirect = false;设置重定向禁用，你就可以从headers的Location属性中获取重定向地址</c>
-        private static (HttpWebRequest request, Stream responseStream, string cookies) HttpRequestStream(string url, string qequest, Dictionary<string, object> param, string chareset, Hashtable headerItem, WebProxy proxy, CookieContainer cookies, string cookie)
+        private (HttpWebRequest request, Stream responseStream, string cookies) HttpRequestStream(string url, string qequest, Dictionary<string, object> param, string chareset, Hashtable headerItem, WebProxy proxy, CookieContainer cookies, string cookie)
         {
-            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
+            request = (HttpWebRequest)WebRequest.Create(url);
             request.Method = qequest;
 
             string dataStr = GetFormData(param, headerItem);

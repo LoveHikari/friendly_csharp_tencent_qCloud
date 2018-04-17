@@ -22,7 +22,7 @@ namespace FsLib.Tencent.QCloud.SDK.Api
         private readonly int _appId;
         private readonly string _secretId;
         private readonly string _secretKey;
-
+        private readonly HttpHelper _httpRequest;
         /// <summary>
         /// CosCloud 构造方法
         /// </summary>
@@ -35,6 +35,7 @@ namespace FsLib.Tencent.QCloud.SDK.Api
             this._appId = appId;
             this._secretId = secretId;
             this._secretKey = secretKey;
+            this._httpRequest = new HttpHelper();
         }
 
         #region 文件接口
@@ -52,7 +53,7 @@ namespace FsLib.Tencent.QCloud.SDK.Api
             var sign = Sign.Signature(_appId, _secretId, _secretKey, GetExpiredTime(), bucketName);
             Hashtable header = new Hashtable();
             header.Add("Authorization", sign);
-            string json = HttpHelper.GetHttpWebRequest(url, "utf-8", header);
+            string json = _httpRequest.GetHttpWebRequest(url, "utf-8", header);
             JObject jo = JObject.Parse(json);
             if (jo["message"].ToString() == "SUCCESS")
             {
@@ -109,7 +110,7 @@ namespace FsLib.Tencent.QCloud.SDK.Api
             Hashtable header = new Hashtable();
             header.Add("Authorization", sign);
             header.Add("Content-Type", "application/json");
-            string json = HttpHelper.PostHttpWebRequest(url, data, "utf-8", header);
+            string json = _httpRequest.PostHttpWebRequest(url, data, "utf-8", header);
 
             return JsonConvert.DeserializeObject<ResponseModel>(json);
         }
@@ -131,7 +132,7 @@ namespace FsLib.Tencent.QCloud.SDK.Api
             header.Add("Authorization", sign);
 
             header.Add("Content-Type", "multipart/form-data");
-            string json = HttpHelper.PostHttpWebRequest(url, data, "utf-8", header);
+            string json = _httpRequest.PostHttpWebRequest(url, data, "utf-8", header);
             return JsonConvert.DeserializeObject<ResponseModel>(json);
         }
         /// <summary>
@@ -152,7 +153,7 @@ namespace FsLib.Tencent.QCloud.SDK.Api
             Hashtable header = new Hashtable();
             header.Add("Authorization", sign);
 
-            using (Stream stream = HttpHelper.GetHttpWebRequest2(url, "utf-8", header))
+            using (Stream stream = _httpRequest.GetHttpWebRequest2(url, "utf-8", header))
             {
                 //创建本地文件写入流
                 using (Stream filestream = new FileStream(path, FileMode.Create))
@@ -182,7 +183,7 @@ namespace FsLib.Tencent.QCloud.SDK.Api
             var sign = Sign.SignatureOnce(_appId, _secretId, _secretKey, (remotePath.StartsWith("/") ? "" : "/") + remotePath, bucketName);
             Hashtable header = new Hashtable();
             header.Add("Authorization", sign);
-            string json = HttpHelper.PostHttpWebRequest(url, null, "utf-8", header);
+            string json = _httpRequest.PostHttpWebRequest(url, null, "utf-8", header);
             return JsonConvert.DeserializeObject<ResponseModel>(json);
         }
         /// <summary>
@@ -201,7 +202,7 @@ namespace FsLib.Tencent.QCloud.SDK.Api
             header.Add("Authorization", sign);
             header.Add("Content-Type", "application/json");
 
-            string json = HttpHelper.PostHttpWebRequest(url, data, "utf-8", header);
+            string json = _httpRequest.PostHttpWebRequest(url, data, "utf-8", header);
             return JsonConvert.DeserializeObject<ResponseModel>(json);
         }
 
@@ -229,7 +230,7 @@ namespace FsLib.Tencent.QCloud.SDK.Api
             var header = new Hashtable();
             header.Add("Authorization", sign);
             header.Add("Content-Type", "application/json");
-            string json = HttpHelper.PostHttpWebRequest(url, data, "utf-8", header);
+            string json = _httpRequest.PostHttpWebRequest(url, data, "utf-8", header);
             JObject jo = JObject.Parse(json);
             if (jo["message"].ToString() == "SUCCESS")
             {
@@ -290,7 +291,7 @@ namespace FsLib.Tencent.QCloud.SDK.Api
             var header = new Hashtable();
             header.Add("Authorization", sign);
 
-            string json = HttpHelper.GetHttpWebRequest(url, "utf-8", header);
+            string json = _httpRequest.GetHttpWebRequest(url, "utf-8", header);
             JObject jo = JObject.Parse(json);
             if (jo["message"].ToString() == "SUCCESS")
             {
@@ -400,7 +401,7 @@ namespace FsLib.Tencent.QCloud.SDK.Api
             header.Add("Authorization", sign);
             header.Add("Content-Type", "multipart/form-data");
 
-            string json = HttpHelper.PostHttpWebRequest(url, data, "utf-8", header);
+            string json = _httpRequest.PostHttpWebRequest(url, data, "utf-8", header);
             JObject jo = JObject.Parse(json);
             if (jo["message"].ToString() == "SUCCESS")
             {
@@ -438,7 +439,7 @@ namespace FsLib.Tencent.QCloud.SDK.Api
             var sign = Sign.Signature(_appId, _secretId, _secretKey, GetExpiredTime(), bucketName);
             var header = new Hashtable();
             header.Add("Authorization", sign);
-            string json = HttpHelper.HttpUploadFile(url, data, localStream, System.IO.Path.GetFileName(remotePath), -1, 0, header);
+            string json = _httpRequest.HttpUploadFile(url, data, localStream, System.IO.Path.GetFileName(remotePath), -1, 0, header);
             JObject jo = JObject.Parse(json);
             if (jo["message"].ToString() == "SUCCESS")
             {
@@ -488,7 +489,7 @@ namespace FsLib.Tencent.QCloud.SDK.Api
             header.Add("Authorization", sign);
             header.Add("Content-Type", "multipart/form-data");
 
-            return HttpHelper.PostHttpWebRequest(url, data, "utf-8", header);
+            return _httpRequest.PostHttpWebRequest(url, data, "utf-8", header);
         }
 
         /// <summary>
@@ -516,7 +517,7 @@ namespace FsLib.Tencent.QCloud.SDK.Api
             var header = new Hashtable();
             header.Add("Authorization", sign);
 
-            return HttpHelper.HttpUploadFile(url, data, localStream, System.IO.Path.GetFileName(remotePath), offset, sliceSize, header);
+            return _httpRequest.HttpUploadFile(url, data, localStream, System.IO.Path.GetFileName(remotePath), offset, sliceSize, header);
         }
 
         /// <summary>
@@ -543,7 +544,7 @@ namespace FsLib.Tencent.QCloud.SDK.Api
             var sign = Sign.Signature(_appId, _secretId, _secretKey, GetExpiredTime(), bucketName);
             header.Add("Authorization", sign);
             header.Add("Content-Type", "multipart/form-data");
-            string json = HttpHelper.PostHttpWebRequest(url, data, "utf-8", header);
+            string json = _httpRequest.PostHttpWebRequest(url, data, "utf-8", header);
 
             JObject jo = JObject.Parse(json);
             if (jo["message"].ToString() == "SUCCESS")
